@@ -16,13 +16,18 @@ import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { SIM_CONFIG } from './data/planet-data.js';
 import {
-  createSolarBodies, SUN_RADIUS, OUTER_COMPACT_RADIUS, OUTER_PROPORTIONAL_RADIUS,
+  createSolarBodies, SUN_RADIUS, OUTER_COMPACT_RADIUS, OUTER_PROPORTIONAL_RADIUS, UNITS_PER_AU,
 } from './planets.js';
 import { createStarfield } from './starfield.js';
 import { CameraDirector } from './camera-controls.js';
 
 const DEG = Math.PI / 180;
 const lerp = (a, b, t) => a + (b - a) * t;
+
+/** Asteroid belt: centred ~2.7 AU, roughly 4.6 years (~1,680 days) per orbit. */
+const BELT_COMPACT_RADIUS = 22.5;
+const BELT_PROPORTIONAL_RADIUS = 2.7 * UNITS_PER_AU;
+const BELT_PERIOD_DAYS = 1680;
 
 export class SolarSystem extends EventTarget {
   /**
@@ -269,6 +274,10 @@ export class SolarSystem extends EventTarget {
       planet.mesh.rotation.y += planet.spin * spinFactor * dt;
       if (planet.clouds) planet.clouds.rotation.y += 0.02 * spinFactor * dt;
     }
+
+    const belt = this.bodies.asteroidBelt;
+    belt.scale.setScalar(lerp(BELT_COMPACT_RADIUS, BELT_PROPORTIONAL_RADIUS, blend));
+    belt.rotation.y = (((360 / BELT_PERIOD_DAYS) * this.simDays) % 360) * DEG;
 
     const sun = this.bodies.sun;
     sun.mesh.rotation.y += sun.spin * spinFactor * dt;

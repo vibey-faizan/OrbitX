@@ -321,6 +321,37 @@ function createMoon(body, earth, ctx) {
 }
 
 /**
+ * Main asteroid belt between Mars and Jupiter. Built on a unit-radius ring and
+ * scaled by the simulation so it follows the compact/proportional layouts.
+ * Particle count and sizes are illustrative.
+ */
+function createAsteroidBelt(count = 2500) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const tint = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    // Denser towards the middle of the belt.
+    const r = 0.9 + (Math.random() + Math.random()) * 0.1;
+    positions[i * 3] = Math.cos(angle) * r;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 0.04;
+    positions[i * 3 + 2] = -Math.sin(angle) * r;
+    tint.setHSL(0.08 + Math.random() * 0.04, 0.2, 0.45 + Math.random() * 0.25);
+    colors.set([tint.r, tint.g, tint.b], i * 3);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const material = new THREE.PointsMaterial({
+    size: 0.12, sizeAttenuation: true, vertexColors: true,
+    transparent: true, opacity: 0.85, depthWrite: false,
+  });
+  const belt = new THREE.Points(geometry, material);
+  belt.name = 'asteroid-belt';
+  return belt;
+}
+
+/**
  * Creates every body and returns handles used by the simulation.
  * @param {{ segments: number, anisotropy: number }} options
  */
@@ -351,6 +382,9 @@ export function createSolarBodies({ segments = 64, anisotropy = 4 } = {}) {
   const earth = planets.find((p) => p.id === 'earth');
   const moon = createMoon(getBody('moon'), earth, ctx);
 
+  const asteroidBelt = createAsteroidBelt();
+  root.add(asteroidBelt);
+
   const reticleTexture = canvasTexture(createReticleCanvas(), ctx);
   const makeReticle = (opacity) => {
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
@@ -364,7 +398,7 @@ export function createSolarBodies({ segments = 64, anisotropy = 4 } = {}) {
 
   const all = [sun, ...planets, moon];
   return {
-    root, orbitGroup, sun, planets, moon, all,
+    root, orbitGroup, sun, planets, moon, all, asteroidBelt,
     byId: new Map(all.map((b) => [b.id, b])),
     reticle: makeReticle(0.9),
     hoverReticle: makeReticle(0.4),
