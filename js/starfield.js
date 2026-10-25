@@ -1,10 +1,11 @@
 /**
- * Deep-space backdrop: a twinkling point starfield with a denser galactic band
- * and a few faint nebula sprites. Effects (twinkle, drift, nebulae) can be
- * switched off for reduced motion or lower-powered devices.
+ * Deep-space backdrop: a twinkling point starfield with a denser galactic band,
+ * a few dozen bright glowing stars with diffraction spikes, and faint nebula
+ * sprites. Effects (twinkle, drift, nebulae) can be switched off for reduced
+ * motion or lower-powered devices.
  */
 import * as THREE from 'three';
-import { createNebulaCanvas } from './textures.js';
+import { createNebulaCanvas, createStarFlareCanvas } from './textures.js';
 
 const STAR_COLORS = [
   [1.0, 1.0, 1.0], [0.8, 0.88, 1.0], [0.68, 0.8, 1.0], [1.0, 0.95, 0.82], [1.0, 0.82, 0.62],
@@ -63,9 +64,9 @@ export function createStarfield({ count = 7000, innerRadius = 3000, outerRadius 
         vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         float twinkle = 1.0 + uTwinkle * 0.4 * sin(uTime * (0.6 + aPhase * 1.8) + aPhase * 6.2831);
-        gl_PointSize = max(1.0, aSize * uPixelRatio * twinkle * 1.6);
+        gl_PointSize = max(1.0, aSize * uPixelRatio * twinkle * 1.9);
         vColor = aColor;
-        vAlpha = clamp(0.45 + 0.4 * twinkle * (aSize / 2.0), 0.25, 1.0);
+        vAlpha = clamp(0.6 + 0.4 * twinkle * (aSize / 2.0), 0.35, 1.0);
       }`,
     fragmentShader: /* glsl */ `
       varying vec3 vColor;
@@ -110,18 +111,48 @@ export function createStarfield({ count = 7000, innerRadius = 3000, outerRadius 
   }
   group.add(nebulae);
 
+  // Bright stars: glowing sprites with diffraction spikes, scattered across the sky.
+  const flareTexture = new THREE.CanvasTexture(createStarFlareCanvas());
+  flareTexture.colorSpace = THREE.SRGBColorSpace;
+  const brightStars = [];
+  const brightGroup = new THREE.Group();
+  for (let i = 0; i < 48; i++) {
+    const y = Math.random() * 2 - 1;
+    const theta = Math.random() * Math.PI * 2;
+    const s = Math.sqrt(1 - y * y);
+    const color = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+    const opacity = 0.55 + Math.random() * 0.45;
+    const spriteMaterial = new THREE.SpriteMaterial({
+      map: flareTexture, color: new THREE.Color(...color), opacity, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false,
+    });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.position.set(s * Math.cos(theta), y, s * Math.sin(theta)).multiplyScalar(innerRadius * 0.95);
+    // Mostly modest, occasionally large.
+    sprite.scale.setScalar(80 + Math.pow(Math.random(), 3) * 170);
+    sprite.material.rotation = Math.random() < 0.5 ? 0 : Math.PI / 4;
+    brightGroup.add(sprite);
+    brightStars.push({ material: spriteMaterial, base: opacity, speed: 0.4 + Math.random() * 1.2, phase: Math.random() * 6.28 });
+  }
+  group.add(brightGroup);
+
   let effects = true;
 
   return {
     group,
     update(elapsed, dt) {
       material.uniforms.uTime.value = elapsed;
-      if (effects) group.rotation.y += dt * 0.0025;
+      if (!effects) return;
+      group.rotation.y += dt * 0.0025;
+      for (const star of brightStars) {
+        star.material.opacity = star.base * (0.7 + 0.3 * Math.sin(elapsed * star.speed + star.phase));
+      }
     },
     setEffects(enabled) {
       effects = enabled;
       material.uniforms.uTwinkle.value = enabled ? 1 : 0;
       nebulae.visible = enabled;
+      if (!enabled) brightStars.forEach((star) => { star.material.opacity = star.base; });
     },
     setPixelRatio(ratio) {
       material.uniforms.uPixelRatio.value = ratio;
@@ -130,6 +161,8 @@ export function createStarfield({ count = 7000, innerRadius = 3000, outerRadius 
       geometry.dispose();
       material.dispose();
       nebulaResources.forEach((resource) => resource.dispose());
+      flareTexture.dispose();
+      brightStars.forEach((star) => star.material.dispose());
     },
   };
 }
