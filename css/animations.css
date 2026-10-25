@@ -1,0 +1,54 @@
+/* ==========================================================================
+   ORBITX — keyframes, reveal transitions and reduced-motion handling
+   ========================================================================== */
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(77, 227, 255, 0.55); }
+  70% { box-shadow: 0 0 0 10px rgba(77, 227, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(77, 227, 255, 0); }
+}
+
+@keyframes scroll-cue {
+  0% { top: -40%; }
+  100% { top: 100%; }
+}
+
+@keyframes orb-spin {
+  from { background-position: 0 0; }
+  to { background-position: calc(var(--orb-size) * -2) 0; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Spotlight fact swap */
+.fact-spotlight.is-changing .spotlight-text,
+.fact-spotlight.is-changing .spotlight-topic { animation: fade-up 0.5s var(--ease) both; }
+
+/* Scroll reveal (only when JS is running, so content is never hidden without it) */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.js .reveal.is-visible { opacity: 1; transform: none; }
+.planet-grid .reveal:nth-child(3n + 2), .facts-grid .reveal:nth-child(3n + 2) { transition-delay: 0.08s; }
+.planet-grid .reveal:nth-child(3n + 3), .facts-grid .reveal:nth-child(3n + 3) { transition-delay: 0.16s; }
+
+/* Reduced motion: honour the OS setting and the app's own flag */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .js .reveal { opacity: 1; transform: none; }
+}
+.reduce-motion .orb.has-texture { animation: none; }
+.reduced-effects .orb.has-texture { animation-duration: 80s; }
+.reduced-effects .pulse-dot { animation: none; }
