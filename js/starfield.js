@@ -116,12 +116,12 @@ export function createStarfield({ count = 7000, innerRadius = 3000, outerRadius 
   flareTexture.colorSpace = THREE.SRGBColorSpace;
   const brightStars = [];
   const brightGroup = new THREE.Group();
-  for (let i = 0; i < 48; i++) {
+  for (let i = 0; i < 110; i++) {
     const y = Math.random() * 2 - 1;
     const theta = Math.random() * Math.PI * 2;
     const s = Math.sqrt(1 - y * y);
     const color = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
-    const opacity = 0.55 + Math.random() * 0.45;
+    const opacity = 0.75 + Math.random() * 0.25;
     const spriteMaterial = new THREE.SpriteMaterial({
       map: flareTexture, color: new THREE.Color(...color), opacity, transparent: true,
       blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false,
@@ -129,7 +129,7 @@ export function createStarfield({ count = 7000, innerRadius = 3000, outerRadius 
     const sprite = new THREE.Sprite(spriteMaterial);
     sprite.position.set(s * Math.cos(theta), y, s * Math.sin(theta)).multiplyScalar(innerRadius * 0.95);
     // Mostly modest, occasionally large.
-    sprite.scale.setScalar(80 + Math.pow(Math.random(), 3) * 170);
+    sprite.scale.setScalar(120 + Math.pow(Math.random(), 2.5) * 260);
     sprite.material.rotation = Math.random() < 0.5 ? 0 : Math.PI / 4;
     brightGroup.add(sprite);
     brightStars.push({ material: spriteMaterial, base: opacity, speed: 0.4 + Math.random() * 1.2, phase: Math.random() * 6.28 });

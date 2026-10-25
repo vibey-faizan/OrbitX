@@ -125,14 +125,14 @@ export function createGlowCanvas(size = 256) {
 }
 
 /** Bright star: soft core glow plus four thin diffraction spikes (white, tinted by material). */
-export function createStarFlareCanvas(size = 128) {
+export function createStarFlareCanvas(size = 256) {
   const canvas = makeCanvas(size, size);
   const ctx = canvas.getContext('2d');
   const c = size / 2;
-  const glow = ctx.createRadialGradient(c, c, 0, c, c, c * 0.5);
+  const glow = ctx.createRadialGradient(c, c, 0, c, c, c * 0.6);
   glow.addColorStop(0, 'rgba(255,255,255,1)');
-  glow.addColorStop(0.15, 'rgba(255,255,255,0.8)');
-  glow.addColorStop(0.45, 'rgba(255,255,255,0.15)');
+  glow.addColorStop(0.12, 'rgba(255,255,255,0.95)');
+  glow.addColorStop(0.35, 'rgba(255,255,255,0.3)');
   glow.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, size, size);
@@ -141,11 +141,12 @@ export function createStarFlareCanvas(size = 128) {
       ? ctx.createLinearGradient(0, c, size, c)
       : ctx.createLinearGradient(c, 0, c, size);
     g.addColorStop(0, 'rgba(255,255,255,0)');
-    g.addColorStop(0.5, 'rgba(255,255,255,0.9)');
+    g.addColorStop(0.5, 'rgba(255,255,255,1)');
     g.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = g;
-    if (horizontal) ctx.fillRect(0, c - 0.75, size, 1.5);
-    else ctx.fillRect(c - 0.75, 0, 1.5, size);
+    const width = size * 0.022; // thick enough to survive downscaling
+    if (horizontal) ctx.fillRect(0, c - width / 2, size, width);
+    else ctx.fillRect(c - width / 2, 0, width, size);
   };
   spike(true);
   spike(false);
