@@ -324,46 +324,29 @@
       </div>
     </section>
 
-    <!-- ============================== About ============================== -->
+        <!-- ============================== About ============================== -->
     <section id="about" class="section section-alt" tabindex="-1" aria-labelledby="about-title">
-      <div class="container about-layout">
-        <div class="reveal">
+      <div class="container">
+        <div class="reveal" style="max-width: 820px;">
           <p class="eyebrow">About ORBITX</p>
           <h2 id="about-title" class="section-title">Built to make space feel close</h2>
           <p class="section-lead">
-            ORBITX is an interactive Solar System explorer that runs entirely in your browser. It aims to be
-            beautiful <em>and</em> honest: real orbital-period ratios, today’s approximate planetary positions and
-            sourced data, with clear labels wherever the visualisation has to bend reality to fit on a screen.
+            ORBITX is an interactive 3D Solar System explorer that runs entirely in your browser. It lets you
+            travel through our cosmic neighborhood, from the Sun out to Neptune, and learn about each world
+            along the way.
+          </p>
+          <p class="section-lead">
+            Every planet orbits the Sun at its real relative speed, starting from its approximate position today.
+            Click any planet to fly the camera to it and open a profile with its size, distance, length of day and
+            year, temperature, moons, atmosphere and interesting facts. All figures come from NASA.
           </p>
           <ul class="about-points">
-            <li><i data-lucide="database"></i><span><strong>Sourced data.</strong> Figures come from the NASA Planetary Fact Sheet and NASA Science pages, rounded and annotated where they change.</span></li>
-            <li><i data-lucide="sparkles"></i><span><strong>Procedural surfaces.</strong> Planet textures are generated in a Web Worker at load time — no image downloads.</span></li>
-            <li><i data-lucide="accessibility"></i><span><strong>Accessible.</strong> Keyboard shortcuts, screen-reader labels, reduced-motion support and a lighter effects mode.</span></li>
+            <li><i data-lucide="orbit"></i><span><strong>Explore in 3D.</strong> Rotate, zoom and fly between the Sun, the eight planets and Earth’s Moon.</span></li>
+            <li><i data-lucide="search"></i><span><strong>Find any world.</strong> Search by name or nickname, or browse the planet cards.</span></li>
+            <li><i data-lucide="arrow-left-right"></i><span><strong>Compare planets.</strong> Put any two planets side by side and see how their size, distance, days, years and temperatures differ.</span></li>
+            <li><i data-lucide="sparkles"></i><span><strong>Learn something new.</strong> Browse curated space facts drawn from NASA material.</span></li>
+            <li><i data-lucide="info"></i><span><strong>Honest about scale.</strong> Sizes and distances are enlarged so everything fits on screen, and the site always says so.</span></li>
           </ul>
-        </div>
-        <div class="about-side">
-          <div class="glass about-card reveal">
-            <h3>Technology</h3>
-            <ul class="tech-list">
-              <li><span>Three.js</span>3D rendering, lighting, shadows</li>
-              <li><span>GSAP</span>Cinematic UI transitions</li>
-              <li><span>Vanilla JS</span>ES modules, no framework</li>
-              <li><span>Web Audio</span>Synthesised ambience</li>
-              <li><span>Lucide</span>Interface icons</li>
-              <li><span>HTML &amp; CSS</span>Semantic, responsive layout</li>
-            </ul>
-          </div>
-          <div class="glass about-card reveal">
-            <h3>Keyboard shortcuts</h3>
-            <dl class="shortcut-list">
-              <div><dt><kbd>/</kbd></dt><dd>Search planets</dd></div>
-              <div><dt><kbd>Space</kbd></dt><dd>Play / pause motion</dd></div>
-              <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Previous / next body</dd></div>
-              <div><dt><kbd>O</kbd> <kbd>L</kbd></dt><dd>Toggle orbits / labels</dd></div>
-              <div><dt><kbd>R</kbd></dt><dd>Reset camera</dd></div>
-              <div><dt><kbd>Esc</kbd></dt><dd>Close panel or menu</dd></div>
-            </dl>
-          </div>
         </div>
       </div>
     </section>
