@@ -493,6 +493,12 @@ function init() {
   });
 
   document.addEventListener('keydown', onKeyDown);
+
+  // The "Illustrative scale" note closes when clicking anywhere else.
+  const scaleNote = $('.scale-note');
+  document.addEventListener('pointerdown', (event) => {
+    if (scaleNote.open && !scaleNote.contains(event.target)) scaleNote.open = false;
+  });
   setHeroVisible(true);
   heroTimeline = playHeroIntro({ reducedMotion });
   refreshIcons();

@@ -401,6 +401,10 @@ kbd {
 .scene-container {
   position: absolute;
   inset: 0;
+  /* Own stacking context: CSS2DRenderer gives each label a z-index, which must
+     not lift labels above the HUD, rail or panels. */
+  z-index: 0;
+  isolation: isolate;
   opacity: 0;
   transition: opacity 1.4s var(--ease);
 }
@@ -582,7 +586,7 @@ kbd {
   position: absolute;
   top: calc(var(--header-h) + 12px);
   left: var(--gutter);
-  z-index: 5;
+  z-index: 6; /* above the planet rail, so the opened scale note isn't covered */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -628,6 +632,11 @@ kbd {
 .scale-note summary::-webkit-details-marker { display: none; }
 .scale-note summary .lucide { width: 15px; height: 15px; color: var(--cyan); }
 .scale-note p { padding: 0 16px 14px; line-height: 1.55; }
+.scale-note[open] {
+  max-width: 340px;
+  background: rgba(6, 9, 22, 0.96);
+  box-shadow: var(--shadow-lg);
+}
 .scale-note strong { color: var(--text); }
 
 /* Planet rail */
