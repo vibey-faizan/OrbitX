@@ -379,7 +379,9 @@ function onKeyDown(event) {
   if (typing) return;
 
   if (event.key === 'Escape') {
+    const scaleNote = $('.scale-note');
     if (nav.isOpen) nav.close();
+    else if (scaleNote.open) scaleNote.open = false;
     else if (panel.isOpen) closePanel();
     else if (heroTimeline?.isActive()) heroTimeline.progress(1);
     return;

@@ -77,7 +77,7 @@ It is a **static site**: plain HTML, CSS and ES-module JavaScript, with no build
 | `←` `→` | Previous / next body (while exploring) |
 | `O` / `L` | Toggle orbits / labels |
 | `R` | Reset camera |
-| `Esc` | Close the info panel, menu or search |
+| `Esc` | Close the info panel, scale note, menu or search |
 
 ---
 
