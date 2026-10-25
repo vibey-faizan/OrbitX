@@ -32,7 +32,6 @@
   }
   .panel-open .control-center.is-open { transform: none; opacity: 1; visibility: visible; }
   .panel-open .cc-divider { display: none; }
-  .panel-open .planet-rail { bottom: 90px; top: auto; transform: none; }
   .panel-open:has(.control-center.is-open) .planet-rail { opacity: 0; visibility: hidden; }
 }
 

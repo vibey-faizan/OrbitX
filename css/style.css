@@ -572,10 +572,10 @@ kbd {
 }
 
 /* Elements that only appear in exploration mode */
-.hud, .planet-rail, .control-center, .dock-toggle {
+.hud, .scale-note, .planet-rail, .control-center, .dock-toggle {
   transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), visibility 0.6s;
 }
-.is-hero .hud, .is-hero .planet-rail, .is-hero .control-center, .is-hero .dock-toggle {
+.is-hero .hud, .is-hero .scale-note, .is-hero .planet-rail, .is-hero .control-center, .is-hero .dock-toggle {
   opacity: 0;
   visibility: hidden;
   transform: translateY(12px);
@@ -586,7 +586,7 @@ kbd {
   position: absolute;
   top: calc(var(--header-h) + 12px);
   left: var(--gutter);
-  z-index: 6; /* above the planet rail, so the opened scale note isn't covered */
+  z-index: 6;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -613,11 +613,19 @@ kbd {
 }
 .hud-link:hover { border-color: var(--border-strong); }
 
+/* Scale disclaimer: top right, clear of the date card and the planet rail */
 .scale-note {
+  position: absolute;
+  top: calc(var(--header-h) + 12px);
+  right: var(--gutter);
+  z-index: 6;
   border-radius: var(--radius);
   font-size: 0.82rem;
   color: var(--text-2);
 }
+.scale-note summary { justify-content: flex-end; }
+/* The info panel occupies the right side, so the note steps aside while it's open. */
+.panel-open .scale-note { opacity: 0; visibility: hidden; }
 .scale-note summary {
   display: inline-flex;
   align-items: center;
@@ -640,19 +648,23 @@ kbd {
 .scale-note strong { color: var(--text); }
 
 /* Planet rail */
+/* Starts below the date card; scrolls on short screens instead of overlapping it. */
 .planet-rail {
   position: absolute;
   left: var(--gutter);
-  top: 50%;
+  top: calc(var(--header-h) + 72px);
   z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  max-height: calc(100% - var(--header-h) - 72px - 90px);
+  overflow-y: auto;
+  scrollbar-width: none;
   padding: 8px;
   border-radius: var(--radius);
-  transform: translateY(-40%);
 }
-.is-hero .planet-rail { transform: translateY(-40%) translateX(-12px); }
+.planet-rail::-webkit-scrollbar { display: none; }
+.is-hero .planet-rail { transform: translateX(-12px); }
 .rail-item {
   display: flex;
   align-items: center;
