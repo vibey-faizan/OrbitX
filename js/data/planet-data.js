@@ -195,6 +195,37 @@ export const BODIES = [
     ],
   },
   {
+    id: 'iss',
+    name: 'ISS',
+    type: 'satellite',
+    group: 'satellite',
+    category: 'Crewed space station in Earth orbit',
+    color: '#d9e6ff',
+    aliases: ['international space station', 'space station', 'satellite', 'station'],
+    tagline: 'Humanity’s laboratory in low Earth orbit.',
+    intro:
+      'The International Space Station is a permanently crewed laboratory orbiting Earth, built and operated by the space agencies of the United States, Russia, Europe, Japan and Canada. Astronauts live and work aboard it, running experiments in microgravity.',
+    stats: {},
+    display: {
+      diameter: '≈109 m long (truss) × ≈73 m (solar arrays)',
+      distanceLabel: 'Altitude',
+      distance: '≈400 km above Earth (varies, roughly 370–460 km)',
+      orbit: '≈90 minutes around Earth — about 16 orbits a day',
+      rotation: 'Held in a fixed orientation relative to Earth',
+      temperature: '≈ −157 °C to 121 °C on sunlit vs shaded exterior surfaces',
+      temperatureNote: 'The cabin itself is kept at a comfortable room temperature.',
+      moonsLabel: 'Typical crew',
+      moons: 'Usually 7 people (varies with crew rotations)',
+    },
+    atmosphere:
+      'The pressurised modules hold Earth-like air — about 78% nitrogen and 21% oxygen at roughly sea-level pressure.',
+    facts: [
+      'Its first module, Zarya, launched in 1998, and people have lived aboard continuously since November 2000.',
+      'It travels at about 28,000 km/h, fast enough to circle Earth roughly every 90 minutes.',
+      'It is the largest human-made object in space and can often be seen from the ground with the naked eye.',
+    ],
+  },
+  {
     id: 'mars',
     name: 'Mars',
     type: 'planet',

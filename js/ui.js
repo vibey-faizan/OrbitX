@@ -273,7 +273,8 @@ export class PlanetPanel {
     r.atmosphere.textContent = body.atmosphere;
     r.facts.innerHTML = body.facts.map((fact) => `<li>${escapeHTML(fact)}</li>`).join('');
     r.source.innerHTML = `Data: ${DATA_SOURCES.map((s) => `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join(' · ')}. Values are rounded; moon counts change as discoveries are confirmed.`;
-    r.exploreLabel.textContent = body.type === 'planet' ? 'Explore planet' : `Explore ${body.type === 'star' ? 'the Sun' : 'the Moon'}`;
+    const exploreLabels = { planet: 'Explore planet', star: 'Explore the Sun', moon: 'Explore the Moon', satellite: 'Explore the ISS' };
+    r.exploreLabel.textContent = exploreLabels[body.type] ?? 'Explore';
     this.root.querySelector('.panel-body').scrollTop = 0;
   }
 

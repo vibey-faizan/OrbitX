@@ -109,7 +109,8 @@ function enterExploration() {
 
 function neighboursOf(id) {
   const order = NAVIGATION_ORDER;
-  const anchor = id === 'moon' ? 'earth' : id;
+  // The Moon and the ISS step from Earth's position in the order.
+  const anchor = id === 'moon' || id === 'iss' ? 'earth' : id;
   const index = order.indexOf(anchor);
   return {
     prev: getBody(order[(index - 1 + order.length) % order.length]),
@@ -434,7 +435,9 @@ function init() {
 
   renderPlanetCards($('#planet-grid'), PLANETS, { onExplore: (id) => selectBody(id, { scroll: true }) });
   initCardFilters($('#planet-filters'), $('#planet-grid'));
-  renderPlanetRail(dom.rail, BODIES.filter((b) => b.id !== 'moon').concat(getBody('moon')), (id) => selectBody(id));
+  // Sun and planets first, then the Moon and the ISS.
+  const railBodies = BODIES.filter((b) => b.type === 'star' || b.type === 'planet').concat(getBody('moon'), getBody('iss'));
+  renderPlanetRail(dom.rail, railBodies, (id) => selectBody(id));
   initFacts({ grid: $('#facts-grid'), spotlight: $('#fact-spotlight'), button: $('#fact-random'), facts: SPACE_FACTS });
 
   const compareRoot = $('#compare');

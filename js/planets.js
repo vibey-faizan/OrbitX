@@ -41,6 +41,8 @@ export const VISUALS = {
   neptune: { radius: 1.1, compact: 53, color: '#3f6fe0', atmosphere: { color: '#7aa2ff', intensity: 0.6, power: 3 } },
   // Moon radius keeps the true Moon/Earth ratio (0.273); orbit distance is illustrative.
   moon: { radius: 0.158, orbitRadius: 1.45, inclination: 5.14, color: '#a7a7a7', bump: 0.6 },
+  // ISS: hugely enlarged so it is visible; real inclination to the equator (51.6°).
+  iss: { radius: 0.05, orbitRadius: 0.8, inclination: 51.6, orbitSeconds: 9 },
 };
 
 export const OUTER_COMPACT_RADIUS = VISUALS.neptune.compact;
@@ -321,11 +323,84 @@ function createMoon(body, earth, ctx) {
 }
 
 /**
+ * Simplified ISS model: a long truss with pressurised modules along the
+ * middle, four pairs of solar array wings and white radiators. Built in local
+ * units roughly 1 long, then scaled to `vis.radius`.
+ */
+function createISSModel() {
+  const metal = new THREE.MeshStandardMaterial({ color: '#c9ccd4', roughness: 0.45, metalness: 0.6 });
+  const module = new THREE.MeshStandardMaterial({ color: '#e8e6df', roughness: 0.6, metalness: 0.2 });
+  const panel = new THREE.MeshStandardMaterial({
+    color: '#3b4f8f', roughness: 0.35, metalness: 0.5, emissive: '#0d1636', side: THREE.DoubleSide,
+  });
+  const radiator = new THREE.MeshStandardMaterial({ color: '#f4f4f2', roughness: 0.8, side: THREE.DoubleSide });
+
+  const model = new THREE.Group();
+  const truss = new THREE.Mesh(new THREE.BoxGeometry(1, 0.035, 0.035), metal);
+  model.add(truss);
+
+  // Pressurised modules run perpendicular to the truss.
+  const moduleGeometry = new THREE.CylinderGeometry(0.035, 0.035, 0.5, 12);
+  moduleGeometry.rotateX(Math.PI / 2);
+  const modules = new THREE.Mesh(moduleGeometry, module);
+  modules.position.set(0, -0.03, 0.02);
+  model.add(modules);
+
+  // Solar array wings: two per side at each end of the truss.
+  const wingGeometry = new THREE.BoxGeometry(0.07, 0.004, 0.36);
+  for (const x of [-0.46, -0.37, 0.37, 0.46]) {
+    for (const z of [-0.2, 0.2]) {
+      const wing = new THREE.Mesh(wingGeometry, panel);
+      wing.position.set(x, 0, z);
+      model.add(wing);
+    }
+  }
+
+  const radiatorGeometry = new THREE.BoxGeometry(0.05, 0.003, 0.16);
+  for (const x of [-0.18, 0.18]) {
+    const rad = new THREE.Mesh(radiatorGeometry, radiator);
+    rad.position.set(x, -0.01, -0.1);
+    model.add(rad);
+  }
+  return model;
+}
+
+function createISS(body, earth, ctx) {
+  const vis = VISUALS.iss;
+  // Orbit plane is inclined to Earth's equator, so it lives in the tilted frame.
+  const orbitPlane = new THREE.Group();
+  orbitPlane.rotation.x = vis.inclination * DEG;
+  const pivot = new THREE.Group();
+  orbitPlane.add(pivot);
+  const anchor = new THREE.Group();
+  anchor.position.set(vis.orbitRadius, 0, 0);
+  pivot.add(anchor);
+
+  const mesh = createISSModel();
+  mesh.scale.setScalar(vis.radius * 2);
+  // Like the real station: truss across the orbit plane, modules along the flight path.
+  mesh.rotation.z = Math.PI / 2;
+  anchor.add(mesh);
+
+  const orbitLine = createOrbitLine(ctx.circle, '#d9e6ff');
+  orbitLine.scale.setScalar(vis.orbitRadius);
+  orbitLine.material.opacity = 0.18;
+  orbitPlane.add(orbitLine);
+
+  const label = createLabel(body, { small: true });
+  label.object.position.set(0, 0.12, 0);
+  anchor.add(label.object);
+
+  earth.tiltGroup.add(orbitPlane);
+  return { id: 'iss', data: body, vis, anchor, orbitPlane, pivot, mesh, label, orbitLine, radius: vis.radius, parent: earth };
+}
+
+/**
  * Main asteroid belt between Mars and Jupiter. Built on a unit-radius ring and
  * scaled by the simulation so it follows the compact/proportional layouts.
  * Particle count and sizes are illustrative.
  */
-function createAsteroidBelt(count = 2500) {
+function createAsteroidBelt(ctx, count = 2500) {
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const tint = new THREE.Color();
@@ -342,9 +417,12 @@ function createAsteroidBelt(count = 2500) {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  // Soft round sprite so close-up particles read as specks, not squares.
+  const speck = new THREE.CanvasTexture(createGlowCanvas(64));
+  ctx.disposables.push(speck);
   const material = new THREE.PointsMaterial({
-    size: 0.12, sizeAttenuation: true, vertexColors: true,
-    transparent: true, opacity: 0.85, depthWrite: false,
+    size: 0.16, sizeAttenuation: true, vertexColors: true, map: speck,
+    transparent: true, opacity: 0.9, depthWrite: false,
   });
   const belt = new THREE.Points(geometry, material);
   belt.name = 'asteroid-belt';
@@ -381,8 +459,9 @@ export function createSolarBodies({ segments = 64, anisotropy = 4 } = {}) {
 
   const earth = planets.find((p) => p.id === 'earth');
   const moon = createMoon(getBody('moon'), earth, ctx);
+  const iss = createISS(getBody('iss'), earth, ctx);
 
-  const asteroidBelt = createAsteroidBelt();
+  const asteroidBelt = createAsteroidBelt(ctx);
   root.add(asteroidBelt);
 
   const reticleTexture = canvasTexture(createReticleCanvas(), ctx);
@@ -396,9 +475,9 @@ export function createSolarBodies({ segments = 64, anisotropy = 4 } = {}) {
     return sprite;
   };
 
-  const all = [sun, ...planets, moon];
+  const all = [sun, ...planets, moon, iss];
   return {
-    root, orbitGroup, sun, planets, moon, all, asteroidBelt,
+    root, orbitGroup, sun, planets, moon, iss, all, asteroidBelt,
     byId: new Map(all.map((b) => [b.id, b])),
     reticle: makeReticle(0.9),
     hoverReticle: makeReticle(0.4),

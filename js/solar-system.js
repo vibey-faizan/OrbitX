@@ -288,6 +288,11 @@ export class SolarSystem extends EventTarget {
 
     const moonLongitude = SIM_CONFIG.moonLongitudeJ2000 + SIM_CONFIG.moonDegreesPerDay * this.simDays;
     this.bodies.moon.pivot.rotation.y = moonLongitude * DEG;
+
+    // The real ISS laps Earth every ~90 minutes, far too fast to show at
+    // simulation speed, so it uses its own visual period (capped like spin).
+    const iss = this.bodies.iss;
+    iss.pivot.rotation.y += ((Math.PI * 2) / iss.vis.orbitSeconds) * spinFactor * dt;
   }
 
   _updateViewShift(dt) {
@@ -316,13 +321,13 @@ export class SolarSystem extends EventTarget {
     place(this.bodies.hoverReticle, this.hoveredId !== this.selectedId ? this.hoveredId : null, 2.8);
   }
 
-  /** The Moon label only appears when the camera is near Earth, to avoid clutter. */
+  /** Moon and ISS labels only appear when the camera is near Earth, to avoid clutter. */
   _updateMoonLabel() {
-    const moon = this.bodies.moon;
-    const earth = moon.parent;
-    earth.anchor.getWorldPosition(this._tmp);
-    const near = this.camera.position.distanceTo(this._tmp) < 30 * this.settings.planetScale;
-    moon.label.el.classList.toggle('is-hidden', !near);
+    const { moon, iss } = this.bodies;
+    moon.parent.anchor.getWorldPosition(this._tmp);
+    const distance = this.camera.position.distanceTo(this._tmp) / this.settings.planetScale;
+    moon.label.el.classList.toggle('is-hidden', distance > 30);
+    iss.label.el.classList.toggle('is-hidden', distance > 9 && this.selectedId !== 'iss');
   }
 
   _monitorPerformance(rawDt) {
@@ -414,10 +419,11 @@ export class SolarSystem extends EventTarget {
       const selected = planet.id === this.selectedId;
       planet.orbitLine.material.color.copy(selected ? new THREE.Color('#4de3ff') : planet.orbitLine.userData.baseColor);
       planet.orbitLine.material.opacity = selected ? 0.75 : 0.28;
-      planet.label.el.classList.toggle('is-selected', selected);
     }
-    this.bodies.sun.label.el.classList.toggle('is-selected', this.selectedId === 'sun');
-    this.bodies.moon.label.el.classList.toggle('is-selected', this.selectedId === 'moon');
+    for (const body of this.bodies.all) {
+      body.label.el.classList.toggle('is-selected', body.id === this.selectedId);
+    }
+    this.bodies.iss.orbitLine.material.opacity = this.selectedId === 'iss' ? 0.5 : 0.18;
   }
 
   focusBody(id, { closeUp = false } = {}) {
@@ -429,12 +435,17 @@ export class SolarSystem extends EventTarget {
 
     const radius = this._worldRadius(body);
     // Frame ringed planets by their ring span rather than the globe.
-    const extent = body.vis.ring ? radius * body.vis.ring.outer * 0.62 : radius;
+    const extent = body.vis.ring ? radius * body.vis.ring.outer * 0.62 : body.id === 'iss' ? radius * 0.75 : radius;
     // Narrow portrait screens have a small horizontal field of view; back off.
     const aspectFactor = this.camera.aspect < 1 ? Math.pow(1 / Math.max(this.camera.aspect, 0.45), 0.9) : 1;
     const distance = extent * aspectFactor * (body.isSun ? (closeUp ? 2.6 : 4.2) : closeUp ? 3.0 : 6.2);
     let direction;
-    if (body.isSun) {
+    if (body.id === 'iss') {
+      // View the station from above its solar arrays (model +y) at a slight angle,
+      // so the wings are seen face-on rather than edge-on.
+      const orientation = body.mesh.getWorldQuaternion(new THREE.Quaternion());
+      direction = new THREE.Vector3(0.35, 0.8, 0.5).applyQuaternion(orientation).normalize();
+    } else if (body.isSun) {
       direction = this._tmp.copy(this.camera.position).sub(this.director.controls.target).normalize().clone();
       if (direction.y < 0.2) direction.setY(0.3).normalize();
     } else {
@@ -538,6 +549,7 @@ export class SolarSystem extends EventTarget {
       case 'orbits':
         b.orbitGroup.visible = value;
         b.moon.orbitLine.visible = value;
+        b.iss.orbitLine.visible = value;
         break;
       case 'labels':
         this.labelRenderer.domElement.style.display = value ? '' : 'none';
