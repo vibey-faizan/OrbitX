@@ -20,12 +20,16 @@ It is a **static site**: plain HTML, CSS and ES-module JavaScript, with no build
 
 **3D Solar System (Three.js)**
 - The Sun and all eight planets in the correct order, plus Earth's Moon.
+- The International Space Station orbiting Earth on its real 51.6° inclined orbit, with a clickable profile.
+- An asteroid belt between Mars and Jupiter that orbits at roughly its real period (~4.6 years).
 - Procedurally generated surface textures (Earth with a separate cloud layer, banded gas giants with Jupiter's Great Red Spot, cratered Mercury and Moon, and so on). They are painted in a Web Worker, so nothing has to download and nothing can go missing.
 - Saturn's rings follow the real C/B/A ring layout with the Cassini Division. Uranus has faint ringlets.
 - Real axial tilts: Uranus rolls on its side, and Venus is effectively upside-down.
 - Emissive Sun with a corona shader and glow. Planets have day-side atmosphere rims.
 - Point-light shadows: Saturn's rings and globe shadow each other, and the Earth–Moon system casts shadows.
-- Twinkling starfield with a galactic band and faint nebulae.
+- Twinkling starfield with a galactic band, glowing bright stars with diffraction spikes, and faint nebulae.
+- Shooting stars that streak across the scene.
+- Planet Explorer cards whose planets float and spin faster on hover.
 
 **Honest motion**
 - Each planet starts at its *approximate position for today*, from its mean longitude at J2000.
